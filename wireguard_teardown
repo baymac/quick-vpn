@@ -119,15 +119,15 @@ echo "Do you want to disable IP forwarding? This may affect other services."
 read -p "Enter your choice (y/n): " disable_forwarding
 if [[ $disable_forwarding == "y" ]]; then
     log "Disabling IP forwarding..."
-    
+
     # Remove from sysctl.conf
     sed -i '/net.ipv4.ip_forward=1/d' /etc/sysctl.conf 2>/dev/null || true
     sed -i '/net.ipv6.conf.all.forwarding=1/d' /etc/sysctl.conf 2>/dev/null || true
-    
+
     # Disable immediately
     echo 0 > /proc/sys/net/ipv4/ip_forward
     echo 0 > /proc/sys/net/ipv6/conf/all/forwarding
-    
+
     success "IP forwarding disabled"
 else
     warning "IP forwarding left enabled"
@@ -138,7 +138,7 @@ echo "Do you want to remove WireGuard packages?"
 read -p "Enter your choice (y/n): " remove_packages
 if [[ $remove_packages == "y" ]]; then
     log "Removing WireGuard packages..."
-    
+
     if command -v apt >/dev/null 2>&1; then
         apt remove --purge -y wireguard qrencode 2>/dev/null || true
         apt autoremove -y 2>/dev/null || true
@@ -182,15 +182,15 @@ echo ""
 if [[ $cleanup_issues -eq 0 ]]; then
     echo "╭──────────────────────────────────────────────────╮"
     echo "│                                                  │"
-    echo "│         WIREGUARD TEARDOWN COMPLETED      │"
+    echo "│         WIREGUARD TEARDOWN COMPLETED             │"
     echo "│                                                  │"
-    echo "│   ✅ Service: Stopped and disabled              │"
-    echo "│   ✅ Interface: Removed                         │"
-    echo "│   ✅ Configuration: Deleted                     │"
-    echo "│   ✅ Firewall: Rules removed                    │"
-    echo "│   ✅ Cleanup: Verified                          │"
+    echo "│   ✅ Service: Stopped and disabled               │"
+    echo "│   ✅ Interface: Removed                          │"
+    echo "│   ✅ Configuration: Deleted                      │"
+    echo "│   ✅ Firewall: Rules removed                     │"
+    echo "│   ✅ Cleanup: Verified                           │"
     echo "│                                                  │"
-    echo "│   🎯 WireGuard completely removed               │"
+    echo "│   🎯 WireGuard completely removed                │"
     echo "│                                                  │"
     echo "╰──────────────────────────────────────────────────╯"
     echo ""
@@ -198,11 +198,11 @@ if [[ $cleanup_issues -eq 0 ]]; then
 else
     echo "╭──────────────────────────────────────────────────╮"
     echo "│                                                  │"
-    echo "│         TEARDOWN COMPLETED WITH ISSUES    │"
+    echo "│         TEARDOWN COMPLETED WITH ISSUES           │"
     echo "│                                                  │"
-    echo "│   ⚠️  Some components may still be present      │"
-    echo "│   📋 Check the errors above                     │"
-    echo "│   🔧 Manual cleanup may be required             │"
+    echo "│   ⚠️  Some components may still be present       │"
+    echo "│   📋 Check the errors above                      │"
+    echo "│   🔧 Manual cleanup may be required              │"
     echo "│                                                  │"
     echo "╰──────────────────────────────────────────────────╯"
     echo ""
