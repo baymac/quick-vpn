@@ -1305,4 +1305,8 @@ main() {
     esac
 }
 
-main "$@"
+# Only run main when invoked directly. When sourced (e.g. by the test suite),
+# the dispatcher is skipped so individual helpers can be exercised in isolation.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

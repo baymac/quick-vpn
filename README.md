@@ -269,10 +269,20 @@ cd quick-vpn
 bash -n qvpn                        # syntax check
 shellcheck qvpn                     # static analysis (optional)
 ./qvpn help                         # smoke test (no root needed for help)
+./tests/run.sh                      # full test suite (no root, no WireGuard)
 ```
 
-Test on a real VPS in a throwaway environment — `qvpn teardown --purge` makes
-iteration cheap.
+The test suite is pure bash — no external dependencies. It covers the parsers
+(including regression tests for the greedy-regex bug), validators, and the
+black-box CLI surface. Run a subset with a glob:
+
+```bash
+./tests/run.sh 'test_parser_*'      # only parser tests
+./tests/run.sh -v test_cli_version  # verbose, single test
+```
+
+For end-to-end verification, test on a real VPS in a throwaway environment —
+`qvpn teardown --purge` makes iteration cheap.
 
 ---
 
