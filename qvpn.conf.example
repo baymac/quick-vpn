@@ -1,0 +1,33 @@
+# qvpn configuration file
+#
+# Copy to /etc/wireguard/qvpn.conf or place ./qvpn.conf next to the binary.
+# Every value here is optional — qvpn ships with sensible defaults and accepts
+# the same fields as CLI flags (CLI flags override the file).
+#
+# Lines starting with `#` are comments. The file is sourced as bash, so
+# values must be valid shell strings (quote anything with spaces).
+
+# ─── Server-side ────────────────────────────────────────────────────────────
+
+# Public IP of this server. Leave empty to auto-detect via ifconfig.me.
+# SERVER_IP=""
+
+# Subnet for the VPN. The server takes .1, the first client takes .2.
+# VPN_SUBNET="10.0.0.0/24"
+
+# WireGuard's address inside the VPN subnet.
+# SERVER_VPN_IP="10.0.0.1"
+
+# UDP port WireGuard listens on (must be reachable from the public internet).
+# LISTEN_PORT="51820"
+
+# Host network interface used for NAT/MASQUERADE. Leave empty to auto-detect.
+# NETWORK_INTERFACE=""
+
+# ─── Client-side defaults (used by `qvpn init` and `qvpn add`) ──────────────
+
+# Name of the first client created during `qvpn init`.
+# CLIENT_NAME="phone"
+
+# DNS servers handed to the client when it connects.
+# DNS_SERVERS="1.1.1.1, 8.8.8.8"
