@@ -56,7 +56,7 @@ install() {
     if [[ -n "$script_dir" && -f "${script_dir}/qvpn" ]]; then
         source="${script_dir}/qvpn"
         log "Installing from local checkout: $source"
-        install -m 0755 "$source" "$TARGET"
+        command install -m 0755 "$source" "$TARGET"
     else
         log "Downloading qvpn from $REMOTE_URL"
         if ! command -v curl >/dev/null 2>&1; then
@@ -71,7 +71,7 @@ install() {
             rm -f "$tmp"
             err "Downloaded file doesn't look like a bash script. Aborting."
         fi
-        install -m 0755 "$tmp" "$TARGET"
+        command install -m 0755 "$tmp" "$TARGET"
         rm -f "$tmp"
     fi
 

@@ -215,8 +215,23 @@ load_config() {
     locate_config
     if [[ -n "$QVPN_CONFIG" ]]; then
         debug "loading config: $QVPN_CONFIG"
+        # Snapshot CLI-set values so they win over the config file.
+        local _cli_client_name="$CLIENT_NAME"
+        local _cli_vpn_subnet="$VPN_SUBNET"
+        local _cli_server_vpn_ip="$SERVER_VPN_IP"
+        local _cli_listen_port="$LISTEN_PORT"
+        local _cli_dns_servers="$DNS_SERVERS"
+        local _cli_server_ip="$SERVER_IP"
+        local _cli_network_interface="$NETWORK_INTERFACE"
         # shellcheck source=/dev/null
         source "$QVPN_CONFIG"
+        [[ -n "$_cli_client_name" ]]       && CLIENT_NAME="$_cli_client_name"
+        [[ -n "$_cli_vpn_subnet" ]]        && VPN_SUBNET="$_cli_vpn_subnet"
+        [[ -n "$_cli_server_vpn_ip" ]]     && SERVER_VPN_IP="$_cli_server_vpn_ip"
+        [[ -n "$_cli_listen_port" ]]       && LISTEN_PORT="$_cli_listen_port"
+        [[ -n "$_cli_dns_servers" ]]       && DNS_SERVERS="$_cli_dns_servers"
+        [[ -n "$_cli_server_ip" ]]         && SERVER_IP="$_cli_server_ip"
+        [[ -n "$_cli_network_interface" ]] && NETWORK_INTERFACE="$_cli_network_interface"
     fi
     CLIENT_NAME="${CLIENT_NAME:-$DEFAULT_CLIENT_NAME}"
     VPN_SUBNET="${VPN_SUBNET:-$DEFAULT_VPN_SUBNET}"
@@ -430,6 +445,9 @@ cmd_init() {
     valid_client_name "$CLIENT_NAME" \
         || die "Invalid client name: $CLIENT_NAME" "Use letters, digits, dot, dash, underscore (≤32 chars)."
 
+    [[ "$VPN_SUBNET" =~ ^[0-9.]+/[0-9]{1,2}$ ]] \
+        || die "Invalid subnet: $VPN_SUBNET" "Use CIDR notation, e.g. 10.0.0.0/24"
+
     # Existing setup → offer teardown
     if [[ -f "$WG_CONF" ]] || systemctl is-active --quiet "wg-quick@${WG_INTERFACE}" 2>/dev/null; then
         warn "An existing WireGuard configuration was detected at $WG_CONF."
@@ -506,7 +524,7 @@ EOF
     cat > "$WG_CONF" <<EOF
 [Interface]
 PrivateKey = ${server_priv}
-Address = ${SERVER_VPN_IP}/24
+Address = ${SERVER_VPN_IP}/${VPN_SUBNET#*/}
 ListenPort = ${LISTEN_PORT}
 PostUp = iptables -A FORWARD -i ${WG_INTERFACE} -j ACCEPT; iptables -t nat -A POSTROUTING -o ${NETWORK_INTERFACE} -j MASQUERADE
 PostDown = iptables -D FORWARD -i ${WG_INTERFACE} -j ACCEPT; iptables -t nat -D POSTROUTING -o ${NETWORK_INTERFACE} -j MASQUERADE
@@ -522,7 +540,7 @@ EOF
     cat > "$CLIENTS_DIR/${CLIENT_NAME}.conf" <<EOF
 [Interface]
 PrivateKey = ${client_priv}
-Address = ${CLIENT_VPN_IP}/24
+Address = ${CLIENT_VPN_IP}/${VPN_SUBNET#*/}
 DNS = ${DNS_SERVERS}
 
 [Peer]
@@ -669,7 +687,7 @@ EOF
     cat > "${CLIENTS_DIR}/${name}.conf" <<EOF
 [Interface]
 PrivateKey = ${client_priv}
-Address = ${CLIENT_VPN_IP}/24
+Address = ${CLIENT_VPN_IP}/${VPN_SUBNET#*/}
 DNS = ${DNS_SERVERS}
 
 [Peer]
