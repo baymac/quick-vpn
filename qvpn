@@ -23,7 +23,6 @@ QVPN_META="${WG_DIR}/.qvpn-meta"
 # ─── Defaults (overridable via config file or flags) ─────────────────────────
 DEFAULT_CLIENT_NAME="phone"
 DEFAULT_VPN_SUBNET="10.0.0.0/24"
-DEFAULT_SERVER_VPN_IP="10.0.0.1"
 DEFAULT_LISTEN_PORT="51820"
 DEFAULT_DNS_SERVERS="1.1.1.1, 8.8.8.8"
 DEFAULT_KEEPALIVE="25"
@@ -235,7 +234,7 @@ load_config() {
     fi
     CLIENT_NAME="${CLIENT_NAME:-$DEFAULT_CLIENT_NAME}"
     VPN_SUBNET="${VPN_SUBNET:-$DEFAULT_VPN_SUBNET}"
-    SERVER_VPN_IP="${SERVER_VPN_IP:-$DEFAULT_SERVER_VPN_IP}"
+    SERVER_VPN_IP="${SERVER_VPN_IP:-$(subnet_prefix "$VPN_SUBNET").1}"
     LISTEN_PORT="${LISTEN_PORT:-$DEFAULT_LISTEN_PORT}"
     DNS_SERVERS="${DNS_SERVERS:-$DEFAULT_DNS_SERVERS}"
 }
@@ -879,7 +878,7 @@ cmd_list() {
         local nm="${pk_to_name[$pk]:-${C_YELLOW}<unknown>${C_RESET}}"
         local status="${C_DIM}configured${C_RESET}"
         if wg show "$WG_INTERFACE" 2>/dev/null | awk -v p="$pk" '
-            /^peer:/ { if ($2==p) found=1 }
+            /^peer:/ { found = ($2==p) }
             /latest handshake:/ { if (found) { print "ok"; exit } }
         ' | grep -q "ok"; then
             status="${C_GREEN}connected${C_RESET}"
