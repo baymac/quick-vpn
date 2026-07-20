@@ -241,8 +241,12 @@ load_config() {
 
 load_meta() {
     if [[ -f "$QVPN_META" ]]; then
-        # shellcheck source=/dev/null
-        source "$QVPN_META"
+        # Older metadata files persisted QVPN_VERSION, which is readonly in
+        # the running script. Filter it out so existing installs keep working.
+        local meta_content
+        meta_content=$(sed '/^[[:space:]]*QVPN_VERSION[[:space:]]*=/d' "$QVPN_META")
+        # shellcheck source=/dev/stdin
+        source /dev/stdin <<< "$meta_content"
         debug "loaded state: $QVPN_META"
     fi
 }
@@ -250,7 +254,6 @@ load_meta() {
 save_meta() {
     cat > "$QVPN_META" <<EOF
 # qvpn state — written by qvpn ${QVPN_VERSION}. Safe to delete (will be regenerated).
-QVPN_VERSION="${QVPN_VERSION}"
 SERVER_IP="${SERVER_IP}"
 VPN_SUBNET="${VPN_SUBNET}"
 SERVER_VPN_IP="${SERVER_VPN_IP}"
