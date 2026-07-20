@@ -356,6 +356,34 @@ test_config_defaults_applied_when_no_file() {
     assert_eq "$VPN_SUBNET"   "$DEFAULT_VPN_SUBNET"   "default VPN_SUBNET"
 }
 
+test_load_meta_ignores_legacy_version_field() {
+    local tmp; tmp=$(make_tmp)
+    QVPN_META="$tmp/.qvpn-meta"
+    cat > "$QVPN_META" <<'EOF'
+QVPN_VERSION="0.9.0"
+SERVER_IP="203.0.113.10"
+VPN_SUBNET="10.77.0.0/24"
+SERVER_VPN_IP="10.77.0.1"
+LISTEN_PORT="42820"
+DNS_SERVERS="9.9.9.9"
+NETWORK_INTERFACE="ens3"
+EOF
+
+    SERVER_IP=""; VPN_SUBNET=""; SERVER_VPN_IP=""
+    LISTEN_PORT=""; DNS_SERVERS=""; NETWORK_INTERFACE=""
+
+    load_meta
+
+    assert_eq "$QVPN_VERSION" "1.0.0" "runtime QVPN_VERSION should remain unchanged"
+    assert_eq "$SERVER_IP" "203.0.113.10" "SERVER_IP meta"
+    assert_eq "$VPN_SUBNET" "10.77.0.0/24" "VPN_SUBNET meta"
+    assert_eq "$SERVER_VPN_IP" "10.77.0.1" "SERVER_VPN_IP meta"
+    assert_eq "$LISTEN_PORT" "42820" "LISTEN_PORT meta"
+    assert_eq "$DNS_SERVERS" "9.9.9.9" "DNS_SERVERS meta"
+    assert_eq "$NETWORK_INTERFACE" "ens3" "NETWORK_INTERFACE meta"
+    rm -rf "$tmp"
+}
+
 # ============================================================================
 #  BLACK-BOX TESTS — invoke ./qvpn as a subprocess
 # ============================================================================
